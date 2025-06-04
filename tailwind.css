@@ -1,0 +1,121 @@
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .all-\[unset\] {
+    all: unset;
+  }
+}
+
+:root {
+  --couleur-du-fond-principale: rgba(255, 255, 255, 1);
+  --couleur-du-texte: rgba(51, 51, 51, 1);
+  --police-courant-light-font-family: "Roboto", Helvetica;
+  --police-courant-light-font-size: 16px;
+  --police-courant-light-font-style: normal;
+  --police-courant-light-font-weight: 300;
+  --police-courant-light-letter-spacing: 0px;
+  --police-courant-light-line-height: normal;
+  --police-courant-regular-font-family: "Roboto", Helvetica;
+  --police-courant-regular-font-size: 16px;
+  --police-courant-regular-font-style: normal;
+  --police-courant-regular-font-weight: 400;
+  --police-courant-regular-letter-spacing: 0px;
+  --police-courant-regular-line-height: normal;
+  --police-principal-titre-1-font-family: "Poppins", Helvetica;
+  --police-principal-titre-1-font-size: 36px;
+  --police-principal-titre-1-font-style: normal;
+  --police-principal-titre-1-font-weight: 800;
+  --police-principal-titre-1-letter-spacing: 0px;
+  --police-principal-titre-1-line-height: normal;
+  --police-principale-titres-h2-font-family: "Poppins", Helvetica;
+  --police-principale-titres-h2-font-size: 28px;
+  --police-principale-titres-h2-font-style: normal;
+  --police-principale-titres-h2-font-weight: 700;
+  --police-principale-titres-h2-letter-spacing: 0px;
+  --police-principale-titres-h2-line-height: normal;
+  --premire-couleur: rgba(255, 102, 0, 1);
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+
+    --card: transparent;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 215 20.2% 65.1%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
+
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+
+    --card: transparent;
+    --card-foreground: 213 31% 91%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 216 34% 17%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
