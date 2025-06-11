@@ -19,7 +19,8 @@ import {
   Users,
   TrendingUp,
   UserCircle,
-  Edit
+  Edit,
+  Shield
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Menu } from './pages/Menu';
@@ -315,7 +316,10 @@ export const RestaurantDashboard = () => {
                 <UserCircle className="w-10 h-10 text-gray-400" />
                 <div>
                   <p className="text-sm font-semibold">{userData.firstName} {userData.lastName}</p>
-                  <p className="text-xs text-[#ff6600] font-medium">@{userData.username}</p>
+                  <div className="flex items-center gap-1">
+                    <Shield className="w-3 h-3 text-[#ff6600]" />
+                    <p className="text-xs text-[#ff6600] font-medium">@{userData.username}</p>
+                  </div>
                   <p className="text-xs text-gray-500">{userData.email}</p>
                 </div>
               </div>
