@@ -23,8 +23,15 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   useEffect(() => {
     const initMap = async () => {
       try {
+        // Check if API key is available
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        
+        if (!apiKey) {
+          throw new Error('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment variables.');
+        }
+
         const loader = new Loader({
-          apiKey: 'AIzaSyBFw0Qbyq9zTFTd-tUY6dO_BcqCGAOtOqA', // Clé API publique pour démo
+          apiKey: apiKey,
           version: 'weekly',
           libraries: ['places']
         });
@@ -97,7 +104,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         }
       } catch (err) {
         console.error('Erreur lors du chargement de Google Maps:', err);
-        setError('Impossible de charger la carte. Veuillez réessayer.');
+        setError(err instanceof Error ? err.message : 'Impossible de charger la carte. Veuillez réessayer.');
         setIsLoading(false);
       }
     };
@@ -114,6 +121,16 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         <div className="text-center p-4">
           <p className="text-red-500 font-medium mb-2">Erreur de chargement</p>
           <p className="text-gray-600 text-sm">{error}</p>
+          {error.includes('API key') && (
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <p className="text-yellow-800 text-xs">
+                <strong>Configuration requise:</strong><br/>
+                1. Obtenez une clé API Google Maps depuis la Console Google Cloud<br/>
+                2. Activez les APIs "Maps JavaScript API" et "Places API"<br/>
+                3. Ajoutez la variable d'environnement VITE_GOOGLE_MAPS_API_KEY
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );
