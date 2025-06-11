@@ -6,7 +6,8 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import { OpenStreetMap } from '../../components/ui/openstreet-map';
-import { MapPin, Upload, User, Navigation } from 'lucide-react';
+import { LocationSearch } from '../../components/ui/location-search';
+import { MapPin, Upload, User, Navigation, Map } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const restaurantSchema = z.object({
@@ -83,49 +84,19 @@ export const RestaurantSignup = () => {
     setValue('longitude', location.lng);
   };
 
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          
-          // Géocodage inverse avec Nominatim
-          try {
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
-            );
-            const data = await response.json();
-            const address = data.display_name || `Coordonnées: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            
-            handleLocationSelect({
-              lat: latitude,
-              lng: longitude,
-              address
-            });
-          } catch (error) {
-            console.error('Erreur de géocodage:', error);
-            handleLocationSelect({
-              lat: latitude,
-              lng: longitude,
-              address: `Coordonnées: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-            });
-          }
-        },
-        (error) => {
-          console.error('Erreur de géolocalisation:', error);
-          alert('Impossible d\'obtenir votre position actuelle.');
-        }
-      );
-    } else {
-      alert('La géolocalisation n\'est pas supportée par ce navigateur.');
-    }
-  };
-
   const onSubmit = async (data: any) => {
     if (!usernameAvailable) {
       setError('username', {
         type: 'manual',
         message: 'Ce nom d\'utilisateur n\'est pas disponible'
+      });
+      return;
+    }
+
+    if (!selectedLocation) {
+      setError('address', {
+        type: 'manual',
+        message: 'Veuillez sélectionner une localisation précise'
       });
       return;
     }
@@ -395,18 +366,34 @@ export const RestaurantSignup = () => {
                       <h2 className="text-lg font-bold text-gray-800">Localisation</h2>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
+                      {/* Barre de recherche d'adresse */}
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">
+                          Rechercher une adresse <span className="text-red-500">*</span>
+                        </Label>
+                        <LocationSearch
+                          onLocationSelect={handleLocationSelect}
+                          placeholder="Tapez votre adresse (ex: 123 Rue Mohammed V, Casablanca)"
+                          value={selectedLocation?.address || ''}
+                        />
+                        <p className="text-xs text-gray-500">
+                          Recherchez votre adresse ou utilisez le bouton de géolocalisation
+                        </p>
+                      </div>
+
+                      {/* Adresse sélectionnée */}
                       <div className="space-y-1">
                         <Label htmlFor="address" className="text-sm font-medium">
-                          Adresse <span className="text-red-500">*</span>
+                          Adresse sélectionnée
                         </Label>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                           <Input
                             {...register('address')}
                             id="address"
-                            placeholder="Sélectionnez sur la carte ou tapez l'adresse"
-                            className="h-10 pl-10 rounded-lg border-2"
+                            placeholder="Aucune adresse sélectionnée"
+                            className="h-10 pl-10 rounded-lg border-2 bg-gray-50"
                             value={selectedLocation?.address || ''}
                             readOnly
                           />
@@ -416,33 +403,35 @@ export const RestaurantSignup = () => {
                         )}
                       </div>
 
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          onClick={() => setShowMap(!showMap)}
-                          className="flex-1 h-10 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white rounded-lg"
-                        >
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {showMap ? 'Masquer la carte' : 'Ouvrir la carte'}
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={getCurrentLocation}
-                          variant="outline"
-                          className="h-10 px-3 border-2 border-[#ff6600] text-[#ff6600] hover:bg-[#ff6600] hover:text-white rounded-lg"
-                        >
-                          <Navigation className="w-4 h-4" />
-                        </Button>
-                      </div>
+                      {/* Bouton pour afficher/masquer la carte */}
+                      <Button
+                        type="button"
+                        onClick={() => setShowMap(!showMap)}
+                        variant="outline"
+                        className="w-full h-10 border-2 border-[#ff6600] text-[#ff6600] hover:bg-[#ff6600] hover:text-white rounded-lg transition-all duration-200"
+                      >
+                        <Map className="w-4 h-4 mr-2" />
+                        {showMap ? 'Masquer la carte' : 'Affiner sur la carte'}
+                      </Button>
 
+                      {/* Informations de localisation */}
                       {selectedLocation && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <p className="text-sm font-medium text-green-800 mb-1">
-                            📍 Position sélectionnée
-                          </p>
-                          <p className="text-xs text-green-700">
-                            Lat: {selectedLocation.lat.toFixed(6)}, Lng: {selectedLocation.lng.toFixed(6)}
-                          </p>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <span className="text-green-600 text-lg">📍</span>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-green-800 mb-1">
+                                Position confirmée
+                              </p>
+                              <p className="text-xs text-green-700 mb-2">
+                                {selectedLocation.address}
+                              </p>
+                              <div className="grid grid-cols-2 gap-2 text-xs text-green-600">
+                                <span>Lat: {selectedLocation.lat.toFixed(6)}</span>
+                                <span>Lng: {selectedLocation.lng.toFixed(6)}</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -457,7 +446,7 @@ export const RestaurantSignup = () => {
                           className="rounded-lg overflow-hidden"
                         />
                         <p className="text-xs text-gray-500 text-center">
-                          Cliquez sur la carte ou glissez le marqueur pour définir l'emplacement exact de votre restaurant
+                          Cliquez sur la carte ou glissez le marqueur pour affiner la position
                         </p>
                       </div>
                     )}
@@ -576,7 +565,7 @@ export const RestaurantSignup = () => {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting || !usernameAvailable}
+                  disabled={isSubmitting || !usernameAvailable || !selectedLocation}
                   className="h-12 px-8 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white rounded-lg transition-all duration-200 disabled:opacity-50"
                 >
                   {isSubmitting ? (
