@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
 import { OpenStreetMap } from '../../components/ui/openstreet-map';
 import { LocationSearch } from '../../components/ui/location-search';
-import { MapPin, Upload, User, Navigation, Map } from 'lucide-react';
+import { MapPin, Upload, User, Navigation, Map, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const restaurantSchema = z.object({
@@ -288,6 +288,22 @@ export const RestaurantSignup = () => {
                         {usernameAvailable === false && (
                           <p className="text-red-500 text-xs">✗ Déjà pris</p>
                         )}
+                        
+                        {/* Information importante sur le nom d'utilisateur */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <p className="text-xs font-medium text-blue-800 mb-1">
+                                Important : Nom d'utilisateur unique
+                              </p>
+                              <p className="text-xs text-blue-700">
+                                Ce nom d'utilisateur vous permettra de récupérer ou changer votre email 
+                                en cas d'oubli. Choisissez-le avec soin, il sera unique sur la plateforme.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="space-y-1">
@@ -319,6 +335,9 @@ export const RestaurantSignup = () => {
                         {errors.email && (
                           <p className="text-red-500 text-xs">{errors.email.message as string}</p>
                         )}
+                        <p className="text-xs text-gray-500">
+                          Vous pourrez récupérer ou changer cet email grâce à votre nom d'utilisateur
+                        </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
