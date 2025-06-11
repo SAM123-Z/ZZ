@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
-import { User, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const emailRecoverySchema = z.object({
   username: z.string().min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères'),
@@ -18,9 +19,17 @@ interface EmailRecoveryDialogProps {
   onOpenChange: (open: boolean) => void;
   mode: 'recover' | 'change';
   onModeChange: (mode: 'recover' | 'change') => void;
+  onSuccess?: (newEmail?: string) => void;
 }
 
-export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }: EmailRecoveryDialogProps) => {
+export const EmailRecoveryDialog = ({ 
+  isOpen, 
+  onOpenChange, 
+  mode, 
+  onModeChange,
+  onSuccess 
+}: EmailRecoveryDialogProps) => {
+  const { updateProfile } = useAuth();
   const [step, setStep] = useState<'username' | 'verification' | 'success'>('username');
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<{username: string; email: string; restaurantName?: string} | null>(null);
@@ -83,6 +92,12 @@ export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }
           console.log('Email de récupération envoyé à:', userInfo?.email);
         } else {
           console.log('Email changé de', userInfo?.email, 'vers', data.newEmail);
+          
+          // Mettre à jour l'email dans le contexte d'authentification
+          if (data.newEmail) {
+            await updateProfile({ email: data.newEmail });
+            onSuccess?.(data.newEmail);
+          }
         }
         
         setStep('success');
@@ -156,7 +171,14 @@ export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }
                 className="flex-1 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white"
                 disabled={isLoading}
               >
-                {isLoading ? 'Recherche...' : 'Continuer'}
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Recherche...
+                  </div>
+                ) : (
+                  'Continuer'
+                )}
               </Button>
             </div>
 
@@ -229,6 +251,10 @@ export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }
                   )}
                 </div>
 
+                {errors.root && (
+                  <p className="text-red-500 text-sm text-center">{errors.root.message}</p>
+                )}
+
                 <div className="flex gap-3">
                   <Button
                     type="button"
@@ -244,7 +270,14 @@ export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }
                     className="flex-1 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Changement...' : 'Changer l\'email'}
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Changement...
+                      </div>
+                    ) : (
+                      'Changer l\'email'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -274,7 +307,14 @@ export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }
                     className="flex-1 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Envoi...' : 'Envoyer l\'email'}
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Envoi...
+                      </div>
+                    ) : (
+                      'Envoyer l\'email'
+                    )}
                   </Button>
                 </div>
               </div>
@@ -296,7 +336,7 @@ export const EmailRecoveryDialog = ({ isOpen, onOpenChange, mode, onModeChange }
               <p className="text-sm text-gray-600">
                 {mode === 'recover' 
                   ? `Un email de récupération a été envoyé à ${userInfo?.email}. Vérifiez votre boîte de réception et suivez les instructions.`
-                  : 'Votre adresse email a été mise à jour avec succès. Vous pouvez maintenant vous connecter avec votre nouvelle adresse.'
+                  : 'Votre adresse email a été mise à jour avec succès. Les modifications ont été synchronisées avec votre profil.'
                 }
               </p>
             </div>
