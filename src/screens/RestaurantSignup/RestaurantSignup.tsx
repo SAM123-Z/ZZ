@@ -5,7 +5,7 @@ import * as z from 'zod';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
-import { MapPin, Upload } from 'lucide-react';
+import { MapPin, Upload, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const restaurantSchema = z.object({
@@ -16,6 +16,10 @@ const restaurantSchema = z.object({
   address: z.string().min(1, "L'adresse est requise"),
   firstName: z.string().min(1, 'Le prénom est requis'),
   lastName: z.string().min(1, 'Le nom est requis'),
+  username: z.string()
+    .min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères')
+    .max(20, 'Le nom d\'utilisateur ne peut pas dépasser 20 caractères')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres et underscores'),
   phone: z.string().min(1, 'Le téléphone est requis'),
   email: z.string().email('Email invalide'),
   password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
@@ -30,12 +34,54 @@ export const RestaurantSignup = () => {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, setError, watch } = useForm({
     resolver: zodResolver(restaurantSchema)
   });
 
+  const watchedUsername = watch('username');
+
+  // Vérification de disponibilité du nom d'utilisateur
+  const checkUsernameAvailability = async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+
+    setCheckingUsername(true);
+    
+    // Simuler un appel API
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Simuler quelques noms d'utilisateur déjà pris
+    const takenUsernames = ['admin', 'user', 'test', 'demo', 'restaurant', 'foodswift'];
+    const isAvailable = !takenUsernames.includes(username.toLowerCase());
+    
+    setUsernameAvailable(isAvailable);
+    setCheckingUsername(false);
+  };
+
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (watchedUsername) {
+        checkUsernameAvailability(watchedUsername);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [watchedUsername]);
+
   const onSubmit = async (data: any) => {
+    if (!usernameAvailable) {
+      setError('username', {
+        type: 'manual',
+        message: 'Ce nom d\'utilisateur n\'est pas disponible'
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       console.log('Form data:', { ...data, coverImage, logo });
@@ -201,6 +247,47 @@ export const RestaurantSignup = () => {
                     </div>
 
                     <div className="space-y-1">
+                      <Label htmlFor="username" className="text-sm font-medium">
+                        Nom d'utilisateur <span className="text-red-500">*</span>
+                      </Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                        <Input
+                          {...register('username')}
+                          id="username"
+                          placeholder="nom_utilisateur_unique"
+                          className={`h-10 pl-10 pr-10 rounded-lg border-2 ${
+                            usernameAvailable === true ? 'border-green-500' : 
+                            usernameAvailable === false ? 'border-red-500' : ''
+                          }`}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          {checkingUsername && (
+                            <div className="w-4 h-4 border-2 border-gray-300 border-t-[#ff6600] rounded-full animate-spin"></div>
+                          )}
+                          {!checkingUsername && usernameAvailable === true && (
+                            <span className="text-green-500 text-sm">✓</span>
+                          )}
+                          {!checkingUsername && usernameAvailable === false && (
+                            <span className="text-red-500 text-sm">✗</span>
+                          )}
+                        </div>
+                      </div>
+                      {errors.username && (
+                        <p className="text-red-500 text-xs">{errors.username.message as string}</p>
+                      )}
+                      {usernameAvailable === true && (
+                        <p className="text-green-600 text-xs">✓ Ce nom d'utilisateur est disponible</p>
+                      )}
+                      {usernameAvailable === false && (
+                        <p className="text-red-500 text-xs">✗ Ce nom d'utilisateur est déjà pris</p>
+                      )}
+                      <p className="text-gray-500 text-xs">
+                        Unique sur la plateforme • 3-20 caractères • Lettres, chiffres et _ uniquement
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
                       <Label htmlFor="phone" className="text-sm font-medium">
                         Téléphone <span className="text-red-500">*</span>
                       </Label>
@@ -304,6 +391,9 @@ export const RestaurantSignup = () => {
                       {errors.email && (
                         <p className="text-red-500 text-xs">{errors.email.message as string}</p>
                       )}
+                      <p className="text-gray-500 text-xs">
+                        Utilisé pour la récupération de compte uniquement
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,8 +445,8 @@ export const RestaurantSignup = () => {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="h-10 px-6 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white rounded-lg transition-all duration-200"
+                  disabled={isSubmitting || !usernameAvailable}
+                  className="h-10 px-6 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white rounded-lg transition-all duration-200 disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
