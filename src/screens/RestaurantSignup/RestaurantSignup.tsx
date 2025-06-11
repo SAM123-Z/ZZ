@@ -5,7 +5,7 @@ import * as z from 'zod';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Label } from '../../components/ui/label';
-import { GoogleMap } from '../../components/ui/google-map';
+import { OpenStreetMap } from '../../components/ui/openstreet-map';
 import { MapPin, Upload, User, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -86,22 +86,30 @@ export const RestaurantSignup = () => {
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
-          // Utiliser le géocodeur inverse pour obtenir l'adresse
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode(
-            { location: { lat: latitude, lng: longitude } },
-            (results, status) => {
-              if (status === 'OK' && results?.[0]) {
-                handleLocationSelect({
-                  lat: latitude,
-                  lng: longitude,
-                  address: results[0].formatted_address
-                });
-              }
-            }
-          );
+          
+          // Géocodage inverse avec Nominatim
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+            const address = data.display_name || `Coordonnées: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            
+            handleLocationSelect({
+              lat: latitude,
+              lng: longitude,
+              address
+            });
+          } catch (error) {
+            console.error('Erreur de géocodage:', error);
+            handleLocationSelect({
+              lat: latitude,
+              lng: longitude,
+              address: `Coordonnées: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+            });
+          }
         },
         (error) => {
           console.error('Erreur de géolocalisation:', error);
@@ -439,10 +447,10 @@ export const RestaurantSignup = () => {
                       )}
                     </div>
 
-                    {/* Carte Google Maps */}
+                    {/* Carte OpenStreetMap */}
                     {showMap && (
                       <div className="space-y-2">
-                        <GoogleMap
+                        <OpenStreetMap
                           onLocationSelect={handleLocationSelect}
                           initialLocation={selectedLocation || { lat: 33.5731, lng: -7.5898 }}
                           height="350px"
