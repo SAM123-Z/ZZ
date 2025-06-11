@@ -40,9 +40,8 @@ export const BasicInformation = () => {
     firstName: user?.firstName || 'Yacin',
     lastName: user?.lastName || 'Nicay',
     username: user?.username || 'hungry_puppets_resto',
-    email: user?.email || 'y**********@gmail.com',
-    fullEmail: user?.email || 'yacin.nicay@gmail.com',
-    phone: user?.phone || '0606060606',
+    email: user?.email || 'yacin.nicay@gmail.com',
+    phone: user?.phone || '+212 6XX XXX XXX',
     restaurantName: 'Hungry Puppets'
   };
 
@@ -127,7 +126,7 @@ export const BasicInformation = () => {
         email: data.newEmail
       });
 
-      console.log('Email changé de', userData.fullEmail, 'vers', data.newEmail);
+      console.log('Email changé de', userData.email, 'vers', data.newEmail);
       
       setEmailChangeSuccess(true);
       setIsChangingEmail(false);
@@ -157,11 +156,15 @@ export const BasicInformation = () => {
 
   const handleEmailRecoverySuccess = (newEmail?: string) => {
     if (newEmail) {
-      // Simuler la mise à jour de l'email depuis le dialog
-      updateProfile({ email: newEmail });
+      // L'email a été changé via le nom d'utilisateur
       setEmailChangeSuccess(true);
       setTimeout(() => setEmailChangeSuccess(false), 5000);
     }
+  };
+
+  const refreshUserData = () => {
+    // Simuler un rafraîchissement des données
+    window.location.reload();
   };
 
   return (
@@ -258,7 +261,7 @@ export const BasicInformation = () => {
                   <Input
                     id="username"
                     value={userData.username}
-                    className="pl-10 rounded-lg border-2 bg-gray-50"
+                    className="pl-10 pr-10 rounded-lg border-2 bg-gray-50"
                     disabled
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -289,7 +292,7 @@ export const BasicInformation = () => {
                             </p>
                           </div>
                           <p className="text-xs text-green-700 mt-1">
-                            Votre nouvelle adresse email a été enregistrée et synchronisée.
+                            Votre nouvelle adresse email a été enregistrée et synchronisée automatiquement.
                           </p>
                         </div>
                       )}
@@ -302,18 +305,16 @@ export const BasicInformation = () => {
                           </span>
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-blue-600" />
-                            {user && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => window.location.reload()}
-                                className="h-6 w-6 p-0 hover:bg-blue-100"
-                                title="Actualiser les données"
-                              >
-                                <RefreshCw className="w-3 h-3 text-blue-600" />
-                              </Button>
-                            )}
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={refreshUserData}
+                              className="h-6 w-6 p-0 hover:bg-blue-100"
+                              title="Actualiser les données"
+                            >
+                              <RefreshCw className="w-3 h-3 text-blue-600" />
+                            </Button>
                           </div>
                         </div>
                         
@@ -458,7 +459,7 @@ export const BasicInformation = () => {
                                 variant="link"
                                 className="text-xs text-blue-600 hover:text-blue-700 p-0 h-auto"
                               >
-                                Ou utiliser le nom d'utilisateur pour changer l'email
+                                🔐 Utiliser le nom d'utilisateur pour changer l'email
                               </Button>
                             </div>
                           </div>
@@ -480,7 +481,7 @@ export const BasicInformation = () => {
                   disabled
                 />
                 <p className="text-xs text-gray-500">
-                  Pour modifier votre email, utilisez les options de gestion ci-dessus
+                  Pour modifier votre email, utilisez les options de gestion ci-dessus ou votre nom d'utilisateur
                 </p>
               </div>
             </div>

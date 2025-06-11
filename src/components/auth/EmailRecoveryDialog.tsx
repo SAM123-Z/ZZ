@@ -6,12 +6,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
-import { User, Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Mail, CheckCircle, AlertCircle, Loader2, Shield, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const emailRecoverySchema = z.object({
+const usernameSchema = z.object({
   username: z.string().min(3, 'Le nom d\'utilisateur doit contenir au moins 3 caractères'),
-  newEmail: z.string().email('Adresse email invalide').optional(),
+});
+
+const emailChangeSchema = z.object({
+  newEmail: z.string().email('Adresse email invalide'),
+  confirmNewEmail: z.string().email('Adresse email invalide')
+}).refine(data => data.newEmail === data.confirmNewEmail, {
+  message: "Les adresses email ne correspondent pas",
+  path: ["confirmNewEmail"]
 });
 
 interface EmailRecoveryDialogProps {
@@ -29,84 +36,88 @@ export const EmailRecoveryDialog = ({
   onModeChange,
   onSuccess 
 }: EmailRecoveryDialogProps) => {
-  const { updateProfile } = useAuth();
+  const { recoverEmailByUsername, changeEmailByUsername } = useAuth();
   const [step, setStep] = useState<'username' | 'verification' | 'success'>('username');
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<{username: string; email: string; restaurantName?: string} | null>(null);
 
-  const { register, handleSubmit, formState: { errors }, setError, reset } = useForm({
-    resolver: zodResolver(emailRecoverySchema)
+  const usernameForm = useForm({
+    resolver: zodResolver(usernameSchema)
+  });
+
+  const emailForm = useForm({
+    resolver: zodResolver(emailChangeSchema)
   });
 
   const handleClose = () => {
     setStep('username');
     setUserInfo(null);
-    reset();
+    usernameForm.reset();
+    emailForm.reset();
     onOpenChange(false);
   };
 
-  const onSubmit = async (data: any) => {
+  const handleUsernameSubmit = async (data: any) => {
     try {
       setIsLoading(true);
-
-      if (step === 'username') {
-        // Simuler la recherche du compte par nom d'utilisateur
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Simuler quelques comptes existants
-        const mockAccounts = [
-          { 
-            username: 'hungry_puppets_resto', 
-            email: 'restaurant@hungrypuppets.com',
-            restaurantName: 'Hungry Puppets'
-          },
-          { 
-            username: 'pizza_palace', 
-            email: 'contact@pizzapalace.ma',
-            restaurantName: 'Pizza Palace'
-          },
-          { 
-            username: 'cafe_monarch', 
-            email: 'info@cafemonarch.com',
-            restaurantName: 'Café Monarch'
-          }
-        ];
-
-        const foundAccount = mockAccounts.find(acc => acc.username === data.username);
-        
-        if (!foundAccount) {
-          setError('username', {
-            type: 'manual',
-            message: 'Aucun compte trouvé avec ce nom d\'utilisateur'
-          });
-          return;
-        }
-
-        setUserInfo(foundAccount);
-        setStep('verification');
-      } else if (step === 'verification') {
-        // Simuler l'envoi de l'email ou le changement
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        if (mode === 'recover') {
-          console.log('Email de récupération envoyé à:', userInfo?.email);
-        } else {
-          console.log('Email changé de', userInfo?.email, 'vers', data.newEmail);
-          
-          // Mettre à jour l'email dans le contexte d'authentification
-          if (data.newEmail) {
-            await updateProfile({ email: data.newEmail });
-            onSuccess?.(data.newEmail);
-          }
-        }
-        
-        setStep('success');
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-      setError('root', {
+      
+      // Rechercher le compte par nom d'utilisateur
+      const result = await recoverEmailByUsername(data.username);
+      
+      setUserInfo({
+        username: data.username,
+        email: result.email,
+        restaurantName: result.restaurantName
+      });
+      
+      setStep('verification');
+    } catch (error: any) {
+      usernameForm.setError('username', {
         type: 'manual',
-        message: 'Une erreur est survenue. Veuillez réessayer.'
+        message: error.message || 'Aucun compte trouvé avec ce nom d\'utilisateur'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailChangeSubmit = async (data: any) => {
+    try {
+      setIsLoading(true);
+      
+      if (!userInfo) return;
+      
+      // Changer l'email
+      await changeEmailByUsername(userInfo.username, data.newEmail);
+      
+      // Notifier le succès
+      onSuccess?.(data.newEmail);
+      
+      setStep('success');
+    } catch (error: any) {
+      emailForm.setError('root', {
+        type: 'manual',
+        message: error.message || 'Une erreur est survenue lors du changement d\'email'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRecoverSubmit = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Simuler l'envoi d'un email de récupération
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      console.log('Email de récupération envoyé à:', userInfo?.email);
+      
+      setStep('success');
+    } catch (error: any) {
+      usernameForm.setError('root', {
+        type: 'manual',
+        message: 'Une erreur est survenue lors de l\'envoi de l\'email'
       });
     } finally {
       setIsLoading(false);
@@ -117,17 +128,33 @@ export const EmailRecoveryDialog = ({
     switch (step) {
       case 'username':
         return (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={usernameForm.handleSubmit(handleUsernameSubmit)} className="space-y-6">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="w-8 h-8 text-[#ff6600]" />
+                <Shield className="w-8 h-8 text-[#ff6600]" />
               </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 {mode === 'recover' ? 'Récupérer votre email' : 'Changer votre email'}
               </h3>
               <p className="text-sm text-gray-600">
-                Entrez votre nom d'utilisateur unique de la plateforme pour continuer
+                Utilisez votre nom d'utilisateur unique pour {mode === 'recover' ? 'récupérer' : 'changer'} votre email
               </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-blue-800 mb-1">
+                    Nom d'utilisateur unique et sécurisé
+                  </p>
+                  <p className="text-xs text-blue-700">
+                    Votre nom d'utilisateur est unique sur toute la plateforme FoodSwift. 
+                    Il vous permet de récupérer ou changer votre email même si vous n'avez 
+                    plus accès à votre adresse email actuelle.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -137,23 +164,33 @@ export const EmailRecoveryDialog = ({
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
                 <Input
-                  {...register('username')}
+                  {...usernameForm.register('username')}
                   id="username"
                   placeholder="votre_nom_utilisateur"
                   className="pl-10 rounded-lg border-2"
                   disabled={isLoading}
                 />
               </div>
-              {errors.username && (
-                <p className="text-red-500 text-sm">{errors.username.message as string}</p>
+              {usernameForm.formState.errors.username && (
+                <p className="text-red-500 text-sm">{usernameForm.formState.errors.username.message as string}</p>
               )}
-              <p className="text-xs text-gray-500">
-                Le nom d'utilisateur que vous avez choisi lors de l'inscription de votre restaurant
-              </p>
+              
+              {/* Exemples de noms d'utilisateur pour les tests */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-xs font-medium text-yellow-800 mb-2">
+                  💡 Pour tester, utilisez un de ces noms d'utilisateur :
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <span className="bg-white px-2 py-1 rounded border text-yellow-700">hungry_puppets_resto</span>
+                  <span className="bg-white px-2 py-1 rounded border text-yellow-700">pizza_palace</span>
+                  <span className="bg-white px-2 py-1 rounded border text-yellow-700">cafe_monarch</span>
+                  <span className="bg-white px-2 py-1 rounded border text-yellow-700">burger_king_casa</span>
+                </div>
+              </div>
             </div>
 
-            {errors.root && (
-              <p className="text-red-500 text-sm text-center">{errors.root.message}</p>
+            {usernameForm.formState.errors.root && (
+              <p className="text-red-500 text-sm text-center">{usernameForm.formState.errors.root.message}</p>
             )}
 
             <div className="flex gap-3">
@@ -203,34 +240,40 @@ export const EmailRecoveryDialog = ({
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="w-8 h-8 text-blue-600" />
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Compte trouvé !
               </h3>
+              <p className="text-sm text-gray-600">
+                Nous avons trouvé votre compte associé à ce nom d'utilisateur
+              </p>
             </div>
 
             {/* Informations du compte trouvé */}
-            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Nom d'utilisateur :</span>
-                <span className="font-medium text-[#ff6600]">@{userInfo?.username}</span>
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-[#ff6600]" />
+                  <span className="font-medium text-[#ff6600]">@{userInfo?.username}</span>
+                </div>
               </div>
               {userInfo?.restaurantName && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Restaurant :</span>
-                  <span className="font-medium">{userInfo.restaurantName}</span>
+                  <span className="font-medium text-gray-800">{userInfo.restaurantName}</span>
                 </div>
               )}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Email actuel :</span>
-                <span className="font-medium">{userInfo?.email}</span>
+                <span className="font-medium text-gray-800">{userInfo?.email}</span>
               </div>
             </div>
 
             {mode === 'change' && (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={emailForm.handleSubmit(handleEmailChangeSubmit)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="newEmail">
                     Nouvel email <span className="text-red-500">*</span>
@@ -238,7 +281,7 @@ export const EmailRecoveryDialog = ({
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
                     <Input
-                      {...register('newEmail')}
+                      {...emailForm.register('newEmail')}
                       id="newEmail"
                       type="email"
                       placeholder="nouveau@email.com"
@@ -246,14 +289,45 @@ export const EmailRecoveryDialog = ({
                       disabled={isLoading}
                     />
                   </div>
-                  {errors.newEmail && (
-                    <p className="text-red-500 text-sm">{errors.newEmail.message as string}</p>
+                  {emailForm.formState.errors.newEmail && (
+                    <p className="text-red-500 text-sm">{emailForm.formState.errors.newEmail.message as string}</p>
                   )}
                 </div>
 
-                {errors.root && (
-                  <p className="text-red-500 text-sm text-center">{errors.root.message}</p>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmNewEmail">
+                    Confirmer le nouvel email <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                    <Input
+                      {...emailForm.register('confirmNewEmail')}
+                      id="confirmNewEmail"
+                      type="email"
+                      placeholder="nouveau@email.com"
+                      className="pl-10 rounded-lg border-2"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {emailForm.formState.errors.confirmNewEmail && (
+                    <p className="text-red-500 text-sm">{emailForm.formState.errors.confirmNewEmail.message as string}</p>
+                  )}
+                </div>
+
+                {emailForm.formState.errors.root && (
+                  <p className="text-red-500 text-sm text-center">{emailForm.formState.errors.root.message}</p>
                 )}
+
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-orange-700">
+                      <strong>Important :</strong> Une fois changé, votre nouvel email sera 
+                      immédiatement synchronisé avec votre profil. Votre nom d'utilisateur 
+                      restera inchangé pour de futures récupérations.
+                    </p>
+                  </div>
+                </div>
 
                 <div className="flex gap-3">
                   <Button
@@ -286,10 +360,19 @@ export const EmailRecoveryDialog = ({
             {mode === 'recover' && (
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-sm text-blue-800">
-                    Un email de récupération sera envoyé à <strong>{userInfo?.email}</strong> 
-                    avec les instructions pour récupérer l'accès à votre compte.
-                  </p>
+                  <div className="flex items-start gap-3">
+                    <Mail className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800 mb-1">
+                        Email de récupération
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        Un email avec les instructions de récupération sera envoyé à{' '}
+                        <strong>{userInfo?.email}</strong>. Vérifiez votre boîte de réception 
+                        et vos spams.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
@@ -303,7 +386,7 @@ export const EmailRecoveryDialog = ({
                     Retour
                   </Button>
                   <Button
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={handleRecoverSubmit}
                     className="flex-1 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white"
                     disabled={isLoading}
                   >
@@ -331,30 +414,40 @@ export const EmailRecoveryDialog = ({
             
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                {mode === 'recover' ? 'Email envoyé !' : 'Email changé !'}
+                {mode === 'recover' ? 'Email envoyé avec succès !' : 'Email changé avec succès !'}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mb-4">
                 {mode === 'recover' 
-                  ? `Un email de récupération a été envoyé à ${userInfo?.email}. Vérifiez votre boîte de réception et suivez les instructions.`
-                  : 'Votre adresse email a été mise à jour avec succès. Les modifications ont été synchronisées avec votre profil.'
+                  ? `Un email de récupération a été envoyé à ${userInfo?.email}. Vérifiez votre boîte de réception et suivez les instructions pour récupérer l'accès à votre compte.`
+                  : 'Votre adresse email a été mise à jour avec succès. Les modifications ont été automatiquement synchronisées avec votre profil sur toute la plateforme.'
                 }
               </p>
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <Shield className="w-5 h-5 text-[#ff6600] mt-0.5 flex-shrink-0" />
                 <div className="text-left">
-                  <p className="text-sm font-medium text-yellow-800 mb-1">
-                    Important à retenir :
+                  <p className="text-sm font-medium text-gray-800 mb-1">
+                    Votre nom d'utilisateur reste sécurisé
                   </p>
-                  <p className="text-xs text-yellow-700">
-                    Votre nom d'utilisateur <strong>@{userInfo?.username}</strong> reste inchangé 
-                    et peut toujours être utilisé pour récupérer votre compte à l'avenir.
+                  <p className="text-xs text-gray-600">
+                    Votre nom d'utilisateur <strong className="text-[#ff6600]">@{userInfo?.username}</strong> reste 
+                    inchangé et peut toujours être utilisé pour récupérer ou changer votre email à l'avenir, 
+                    même si vous perdez l'accès à votre nouvelle adresse email.
                   </p>
                 </div>
               </div>
             </div>
+
+            {mode === 'change' && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-xs text-yellow-700">
+                  <strong>Conseil :</strong> Notez votre nom d'utilisateur quelque part en sécurité. 
+                  C'est votre clé de récupération permanente sur la plateforme FoodSwift.
+                </p>
+              </div>
+            )}
 
             <Button
               onClick={handleClose}
@@ -372,7 +465,7 @@ export const EmailRecoveryDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] p-0">
+      <DialogContent className="sm:max-w-[500px] p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-center">
             <span className="text-[#ff6600] text-2xl font-bold">Food</span>
