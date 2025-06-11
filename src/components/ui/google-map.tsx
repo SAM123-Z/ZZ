@@ -26,7 +26,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         
         if (!apiKey || apiKey === 'your_google_maps_api_key_here') {
-          throw new Error('Clé API Google Maps non configurée. Veuillez configurer VITE_GOOGLE_MAPS_API_KEY dans votre fichier .env');
+          throw new Error('Google Maps API key is not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your environment variables.');
         }
 
         // Charger l'API Google Maps de manière dynamique
@@ -38,7 +38,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
           
           await new Promise<void>((resolve, reject) => {
             script.onload = () => resolve();
-            script.onerror = () => reject(new Error('Impossible de charger l\'API Google Maps'));
+            script.onerror = () => reject(new Error('Failed to load Google Maps API'));
             document.head.appendChild(script);
           });
         }
@@ -46,7 +46,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         if (mapRef.current && window.google) {
           const mapInstance = new google.maps.Map(mapRef.current, {
             center: initialLocation,
-            zoom: 13,
+            zoom: 15,
             mapTypeControl: true,
             streetViewControl: true,
             fullscreenControl: true,
@@ -65,7 +65,17 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
             map: mapInstance,
             draggable: true,
             title: 'Emplacement du restaurant',
-            animation: google.maps.Animation.DROP
+            animation: google.maps.Animation.DROP,
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 2C11.6 2 8 5.6 8 10C8 16 16 30 16 30S24 16 24 10C24 5.6 20.4 2 16 2Z" fill="#ff6600"/>
+                  <circle cx="16" cy="10" r="4" fill="white"/>
+                </svg>
+              `),
+              scaledSize: new google.maps.Size(32, 32),
+              anchor: new google.maps.Point(16, 32)
+            }
           });
 
           // Géocodeur pour obtenir l'adresse
@@ -95,6 +105,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
           mapInstance.addListener('click', (event: google.maps.MapMouseEvent) => {
             if (event.latLng) {
               markerInstance.setPosition(event.latLng);
+              mapInstance.panTo(event.latLng);
               updateLocation(event.latLng);
             }
           });
@@ -103,6 +114,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
           markerInstance.addListener('dragend', () => {
             const position = markerInstance.getPosition();
             if (position) {
+              mapInstance.panTo(position);
               updateLocation(position);
             }
           });
@@ -116,7 +128,7 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
         }
       } catch (err) {
         console.error('Erreur lors du chargement de Google Maps:', err);
-        setError(err instanceof Error ? err.message : 'Impossible de charger la carte. Veuillez réessayer.');
+        setError(err instanceof Error ? err.message : 'Unable to load map. Please try again.');
         setIsLoading(false);
       }
     };
@@ -135,32 +147,53 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
   if (error) {
     return (
       <div 
-        className={`flex items-center justify-center bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg ${className}`}
+        className={`flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 border-2 border-dashed border-red-300 rounded-lg ${className}`}
         style={{ height }}
       >
-        <div className="text-center p-4 max-w-md">
-          <div className="text-red-500 text-4xl mb-3">🗺️</div>
-          <p className="text-red-600 font-medium mb-2">Carte non disponible</p>
-          <p className="text-gray-600 text-sm mb-3">{error}</p>
+        <div className="text-center p-6 max-w-lg">
+          <div className="text-6xl mb-4">🗺️</div>
+          <h3 className="text-red-700 font-bold text-lg mb-2">Carte Google Maps non disponible</h3>
+          <p className="text-red-600 text-sm mb-4">{error}</p>
           
-          {error.includes('Clé API') && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left">
-              <p className="text-blue-800 text-sm font-medium mb-2">
-                🔧 Configuration requise:
-              </p>
-              <ol className="text-blue-700 text-xs space-y-1 list-decimal list-inside">
-                <li>Allez sur <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="underline">Google Cloud Console</a></li>
-                <li>Créez une clé API et activez "Maps JavaScript API"</li>
-                <li>Activez aussi "Places API" et "Geocoding API"</li>
-                <li>Copiez votre clé dans le fichier .env</li>
-                <li>Redémarrez le serveur de développement</li>
-              </ol>
+          {error.includes('not configured') && (
+            <div className="bg-white border border-red-200 rounded-lg p-4 text-left mb-4">
+              <h4 className="text-red-800 font-semibold mb-3 flex items-center">
+                🔧 Configuration requise
+              </h4>
+              <div className="space-y-2 text-sm text-red-700">
+                <div className="flex items-start">
+                  <span className="bg-red-100 text-red-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5">1</span>
+                  <span>Allez sur <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="underline font-medium">Google Cloud Console</a></span>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-red-100 text-red-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5">2</span>
+                  <span>Créez un projet et activez ces APIs :</span>
+                </div>
+                <div className="ml-7 space-y-1 text-xs">
+                  <div>• Maps JavaScript API</div>
+                  <div>• Places API</div>
+                  <div>• Geocoding API</div>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-red-100 text-red-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5">3</span>
+                  <span>Créez une clé API</span>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-red-100 text-red-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5">4</span>
+                  <span>Copiez la clé dans votre fichier <code className="bg-gray-100 px-1 rounded">.env</code></span>
+                </div>
+                <div className="flex items-start">
+                  <span className="bg-red-100 text-red-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5">5</span>
+                  <span>Redémarrez avec <code className="bg-gray-100 px-1 rounded">npm run dev</code></span>
+                </div>
+              </div>
             </div>
           )}
           
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 text-xs">
-              💡 <strong>Alternative:</strong> Vous pouvez saisir l'adresse manuellement dans le champ texte en attendant.
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-yellow-800 text-sm">
+              <span className="font-medium">💡 Alternative temporaire :</span><br />
+              Vous pouvez saisir l'adresse manuellement dans le champ texte en attendant la configuration de l'API.
             </p>
           </div>
         </div>
@@ -176,9 +209,14 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
           style={{ height }}
         >
           <div className="text-center">
-            <div className="w-10 h-10 border-4 border-[#ff6600] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <p className="text-gray-700 font-medium">Chargement de la carte...</p>
+            <div className="w-12 h-12 border-4 border-[#ff6600] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-700 font-semibold text-lg">Chargement de la carte...</p>
             <p className="text-gray-500 text-sm mt-1">Connexion à Google Maps</p>
+            <div className="mt-3 flex items-center justify-center space-x-1">
+              <div className="w-2 h-2 bg-[#ff6600] rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-[#ff6600] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-[#ff6600] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
           </div>
         </div>
       )}
@@ -186,21 +224,21 @@ export const GoogleMap: React.FC<GoogleMapProps> = ({
       <div 
         ref={mapRef} 
         style={{ height }}
-        className="w-full rounded-lg border-2 border-gray-300 shadow-sm"
+        className="w-full rounded-lg border-2 border-gray-300 shadow-lg"
       />
       
       {!isLoading && !error && (
-        <div className="absolute top-3 left-3 bg-white px-4 py-2 rounded-lg shadow-lg z-10 border border-gray-200">
-          <p className="text-xs text-gray-700 font-medium flex items-center">
-            <span className="text-[#ff6600] mr-1">📍</span>
-            Cliquez ou glissez pour positionner votre restaurant
+        <div className="absolute top-4 left-4 bg-white px-4 py-3 rounded-lg shadow-lg z-10 border border-gray-200 max-w-xs">
+          <p className="text-sm text-gray-700 font-medium flex items-center">
+            <span className="text-[#ff6600] mr-2 text-lg">📍</span>
+            <span>Cliquez sur la carte ou glissez le marqueur pour positionner votre restaurant</span>
           </p>
         </div>
       )}
       
       {!isLoading && !error && (
-        <div className="absolute bottom-3 right-3 bg-black bg-opacity-75 text-white px-3 py-1 rounded-lg z-10">
-          <p className="text-xs">Google Maps</p>
+        <div className="absolute bottom-4 right-4 bg-black bg-opacity-80 text-white px-3 py-2 rounded-lg z-10 shadow-lg">
+          <p className="text-xs font-medium">Powered by Google Maps</p>
         </div>
       )}
     </div>
