@@ -55,6 +55,7 @@ import { BasicInformation } from './pages/BasicInformation';
 import { ChangePassword } from './pages/ChangePassword';
 import { DashboardOverview } from './pages/DashboardOverview';
 import { AddNewFood } from './pages/AddNewFood';
+import { OrdersList } from './pages/OrdersList';
 
 interface OrderStats {
   confirmed: number;
@@ -206,7 +207,8 @@ export const RestaurantDashboard = () => {
         { 
           name: 'Toutes les commandes', 
           count: orderStats.all,
-          icon: <Package className="h-3 w-3" />
+          icon: <Package className="h-3 w-3" />,
+          component: <OrdersList />
         },
         { 
           name: 'En préparation', 
