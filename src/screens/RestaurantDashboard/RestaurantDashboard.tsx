@@ -46,8 +46,8 @@ import {
   Filter,
   Search,
   MoreHorizontal,
-  Minimize2,
-  Maximize2
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Menu } from './pages/Menu';
@@ -163,7 +163,6 @@ export const RestaurantDashboard = () => {
   const [activeProfileSection, setActiveProfileSection] = useState<'basic' | 'password'>('basic');
   const [expandedSections, setExpandedSections] = useState<string[]>(['COMMANDES']);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMinimized, setIsMinimized] = useState(false);
 
   const userData = {
     firstName: 'Yacin',
@@ -469,9 +468,25 @@ export const RestaurantDashboard = () => {
     <div className="flex h-screen overflow-hidden bg-gray-50">
       <aside className={cn(
         "bg-gradient-to-b from-[#0f0f0f] via-[#1a1a1a] to-[#0f0f0f] text-white transition-all duration-300 h-screen sticky top-0 border-r border-gray-700 shadow-2xl",
-        isSidebarCollapsed ? "w-16" : isMinimized ? "w-20" : "w-80",
-        "flex flex-col"
+        isSidebarCollapsed ? "w-16" : "w-80",
+        "flex flex-col relative"
       )}>
+        {/* Bouton de toggle principal */}
+        <Button
+          onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className={cn(
+            "absolute -right-3 top-6 z-50 bg-[#ff6600] hover:bg-[#ff6600]/90 text-white rounded-full p-2 shadow-lg transition-all duration-300",
+            "border-2 border-white"
+          )}
+          size="icon"
+        >
+          {isSidebarCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
+
         {/* Header Premium */}
         <div className={cn(
           "p-3 border-b border-gray-700 bg-gradient-to-r from-[#ff6600] to-[#ff8533]",
@@ -511,31 +526,11 @@ export const RestaurantDashboard = () => {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              {!isSidebarCollapsed && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg h-7 w-7"
-                >
-                  {isMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg h-7 w-7"
-              >
-                <MenuIcon className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </div>
 
         {/* Search Bar */}
-        {!isSidebarCollapsed && !isMinimized && (
+        {!isSidebarCollapsed && (
           <div className="p-3 border-b border-gray-700">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -557,7 +552,7 @@ export const RestaurantDashboard = () => {
               <div 
                 className={cn(
                   "flex items-center mx-2 px-3 py-2.5 text-gray-300 hover:text-white hover:bg-gradient-to-r hover:from-[#ff6600]/20 hover:to-transparent cursor-pointer transition-all duration-200 rounded-lg group relative",
-                  !isSidebarCollapsed && !isMinimized && "justify-between"
+                  !isSidebarCollapsed && "justify-between"
                 )}
                 onClick={() => handleSidebarItemClick(item)}
               >
@@ -568,14 +563,14 @@ export const RestaurantDashboard = () => {
                       <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                     )}
                   </div>
-                  {!isSidebarCollapsed && !isMinimized && (
+                  {!isSidebarCollapsed && (
                     <span className="text-xs font-medium tracking-wide truncate">
                       {item.name}
                     </span>
                   )}
                 </div>
                 
-                {!isSidebarCollapsed && !isMinimized && (
+                {!isSidebarCollapsed && (
                   <div className="flex items-center gap-2">
                     {item.badge && (
                       <span className={cn(
@@ -605,7 +600,7 @@ export const RestaurantDashboard = () => {
                 )}
 
                 {/* Tooltip pour mode collapsed */}
-                {(isSidebarCollapsed || isMinimized) && (
+                {isSidebarCollapsed && (
                   <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 whitespace-nowrap border border-gray-700">
                     {item.name}
                     {item.count !== undefined && (
@@ -615,7 +610,7 @@ export const RestaurantDashboard = () => {
                 )}
               </div>
               
-              {!isSidebarCollapsed && !isMinimized && item.subItems && expandedSections.includes(item.name) && (
+              {!isSidebarCollapsed && item.subItems && expandedSections.includes(item.name) && (
                 <div className="ml-4 mr-2 mt-1 space-y-0.5 border-l border-gray-700 pl-4">
                   {item.subItems.map((subItem, subIndex) => (
                     <div
@@ -674,17 +669,15 @@ export const RestaurantDashboard = () => {
                   getStatusIndicator(userData.status)
                 )}></div>
               </div>
-              {!isMinimized && (
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-white truncate">
-                    {userData.firstName} {userData.lastName}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <Shield className="w-2 h-2 text-[#ff6600]" />
-                    <p className="text-xs text-[#ff6600] font-medium truncate">@{userData.username}</p>
-                  </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-white truncate">
+                  {userData.firstName} {userData.lastName}
+                </p>
+                <div className="flex items-center gap-1">
+                  <Shield className="w-2 h-2 text-[#ff6600]" />
+                  <p className="text-xs text-[#ff6600] font-medium truncate">@{userData.username}</p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         )}
