@@ -18,6 +18,7 @@ import { Profile } from "./screens/Profile/Profile";
 const AppContent = () => {
   const location = useLocation();
   const isDashboard = location.pathname === '/restaurant-dashboard';
+  const isRestaurantSignup = location.pathname === '/restaurant-signup';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -35,7 +36,7 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
-      {!isDashboard && <FooterSection />}
+      {!isDashboard && !isRestaurantSignup && <FooterSection />}
     </div>
   );
 };
