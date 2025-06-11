@@ -127,6 +127,7 @@ export const RestaurantDashboard = () => {
   const userData = {
     firstName: 'Yacin',
     lastName: 'Nicay',
+    username: 'hungry_puppets_resto', // Nom d'utilisateur unique de la plateforme
     email: 'y**********@gmail.com',
     phone: '0606060606',
     restaurantName: 'Hungry Puppets',
@@ -308,12 +309,13 @@ export const RestaurantDashboard = () => {
                 </span>
               </Button>
               <div 
-                className="flex items-center space-x-3 cursor-pointer"
+                className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors"
                 onClick={handleProfileClick}
               >
                 <UserCircle className="w-10 h-10 text-gray-400" />
                 <div>
                   <p className="text-sm font-semibold">{userData.firstName} {userData.lastName}</p>
+                  <p className="text-xs text-[#ff6600] font-medium">@{userData.username}</p>
                   <p className="text-xs text-gray-500">{userData.email}</p>
                 </div>
               </div>
