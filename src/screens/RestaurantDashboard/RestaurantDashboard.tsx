@@ -54,6 +54,7 @@ import { Menu } from './pages/Menu';
 import { BasicInformation } from './pages/BasicInformation';
 import { ChangePassword } from './pages/ChangePassword';
 import { DashboardOverview } from './pages/DashboardOverview';
+import { AddNewFood } from './pages/AddNewFood';
 
 interface OrderStats {
   confirmed: number;
@@ -257,6 +258,11 @@ export const RestaurantDashboard = () => {
           name: 'Gestion du menu', 
           component: <Menu />,
           icon: <Palette className="h-3 w-3" />
+        },
+        { 
+          name: 'Ajouter un plat', 
+          component: <AddNewFood />,
+          icon: <Package className="h-3 w-3" />
         },
         { 
           name: 'Catégories', 
