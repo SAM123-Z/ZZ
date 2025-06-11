@@ -20,7 +20,12 @@ import {
   TrendingUp,
   UserCircle,
   Edit,
-  Shield
+  Shield,
+  ChefHat,
+  Clock,
+  CheckCircle,
+  Truck,
+  DollarSign
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Menu } from './pages/Menu';
@@ -67,7 +72,7 @@ interface SidebarItem {
   icon: React.ReactNode;
   count?: number;
   component?: React.ReactNode;
-  subItems?: { name: string; component?: React.ReactNode }[];
+  subItems?: { name: string; component?: React.ReactNode; count?: number; icon?: React.ReactNode }[];
 }
 
 const ProductDialog = ({ isOpen, onClose, product }: ProductDialogProps) => {
@@ -124,78 +129,149 @@ export const RestaurantDashboard = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [activeProfileSection, setActiveProfileSection] = useState<'basic' | 'password'>('basic');
+  const [expandedSections, setExpandedSections] = useState<string[]>(['ORDER MANAGEMENT']);
 
   const userData = {
     firstName: 'Yacin',
     lastName: 'Nicay',
-    username: 'hungry_puppets_resto', // Nom d'utilisateur unique de la plateforme
+    username: 'hungry_puppets_resto',
     email: 'y**********@gmail.com',
     phone: '0606060606',
     restaurantName: 'Hungry Puppets',
     restaurantImage: 'https://images.pexels.com/photos/3338681/pexels-photo-3338681.jpeg'
   };
 
+  const orderStats = {
+    all: 63,
+    cooking: 0,
+    pending: 35,
+    confirmed: 1,
+    readyForDelivery: 1,
+    onTheWay: 1,
+    delivered: 23,
+    paymentFailed: 0,
+    canceled: 0
+  };
+
   const sidebarItems: SidebarItem[] = [
     {
       name: 'Dashboard',
-      icon: <Home className="h-5 w-5" />,
+      icon: <Home className="h-4 w-4" />,
       component: <DashboardOverview />
     },
     {
-      name: 'ORDER MANAGEMENT',
-      icon: <ShoppingBag className="h-5 w-5" />,
+      name: 'COMMANDES',
+      icon: <ShoppingBag className="h-4 w-4" />,
       subItems: [
-        { name: 'All', count: 63 },
-        { name: 'Cooking', count: 0 },
-        { name: 'Pending', count: 35 },
-        { name: 'Confirmed', count: 1 },
-        { name: 'Ready For Delivery', count: 1 },
-        { name: 'Food On The Way', count: 1 },
-        { name: 'Delivered', count: 23 },
-        { name: 'Payment Failed', count: 0 },
-        { name: 'Canceled', count: 0 },
+        { 
+          name: 'Toutes', 
+          count: orderStats.all,
+          icon: <Package className="h-3 w-3" />
+        },
+        { 
+          name: 'En préparation', 
+          count: orderStats.cooking,
+          icon: <ChefHat className="h-3 w-3" />
+        },
+        { 
+          name: 'En attente', 
+          count: orderStats.pending,
+          icon: <Clock className="h-3 w-3" />
+        },
+        { 
+          name: 'Confirmées', 
+          count: orderStats.confirmed,
+          icon: <CheckCircle className="h-3 w-3" />
+        },
+        { 
+          name: 'Prêtes', 
+          count: orderStats.readyForDelivery,
+          icon: <Package className="h-3 w-3" />
+        },
+        { 
+          name: 'En livraison', 
+          count: orderStats.onTheWay,
+          icon: <Truck className="h-3 w-3" />
+        },
+        { 
+          name: 'Livrées', 
+          count: orderStats.delivered,
+          icon: <CheckCircle className="h-3 w-3" />
+        }
       ]
     },
     {
       name: 'MENU',
-      icon: <Package className="h-5 w-5" />,
+      icon: <Package className="h-4 w-4" />,
       subItems: [
-        { name: 'Menu du restaurant', component: <Menu /> }
+        { 
+          name: 'Gestion du menu', 
+          component: <Menu />,
+          icon: <ChefHat className="h-3 w-3" />
+        }
       ]
     },
     {
       name: 'ANALYTICS',
-      icon: <TrendingUp className="h-5 w-5" />,
+      icon: <TrendingUp className="h-4 w-4" />,
       subItems: [
-        { name: 'Sales Report' },
-        { name: 'Customer Insights' },
+        { 
+          name: 'Rapport des ventes',
+          icon: <DollarSign className="h-3 w-3" />
+        },
+        { 
+          name: 'Insights clients',
+          icon: <Users className="h-3 w-3" />
+        }
       ]
     },
     {
-      name: 'CUSTOMERS',
-      icon: <Users className="h-5 w-5" />,
+      name: 'CLIENTS',
+      icon: <Users className="h-4 w-4" />,
       subItems: [
-        { name: 'Customer List' },
-        { name: 'Feedback' },
+        { 
+          name: 'Liste des clients',
+          icon: <Users className="h-3 w-3" />
+        },
+        { 
+          name: 'Commentaires',
+          icon: <Star className="h-3 w-3" />
+        }
       ]
     },
     {
-      name: 'SETTINGS',
-      icon: <Settings className="h-5 w-5" />,
+      name: 'PARAMÈTRES',
+      icon: <Settings className="h-4 w-4" />,
       subItems: [
         { 
-          name: 'Basic Information',
-          component: <BasicInformation />
+          name: 'Informations de base',
+          component: <BasicInformation />,
+          icon: <UserCircle className="h-3 w-3" />
         },
         { 
-          name: 'Change Password',
-          component: <ChangePassword />
+          name: 'Mot de passe',
+          component: <ChangePassword />,
+          icon: <Shield className="h-3 w-3" />
         },
-        { name: 'Payment Settings' },
-        { name: 'Notifications' },
+        { 
+          name: 'Paiements',
+          icon: <DollarSign className="h-3 w-3" />
+        },
+        { 
+          name: 'Notifications',
+          icon: <Bell className="h-3 w-3" />
+        }
       ]
-    },
+    }
   ];
+
+  const toggleSection = (sectionName: string) => {
+    setExpandedSections(prev => 
+      prev.includes(sectionName) 
+        ? prev.filter(name => name !== sectionName)
+        : [...prev, sectionName]
+    );
+  };
 
   const handleSubItemClick = (component: React.ReactNode | undefined) => {
     if (component) {
@@ -206,6 +282,8 @@ export const RestaurantDashboard = () => {
   const handleSidebarItemClick = (item: SidebarItem) => {
     if (item.component) {
       setActiveComponent(item.component);
+    } else if (item.subItems) {
+      toggleSection(item.name);
     }
   };
 
@@ -213,26 +291,34 @@ export const RestaurantDashboard = () => {
     setActiveComponent(<BasicInformation />);
   };
 
+  const getStatusColor = (count: number) => {
+    if (count === 0) return 'bg-gray-600 text-gray-300';
+    if (count < 5) return 'bg-green-600 text-white';
+    if (count < 20) return 'bg-yellow-600 text-white';
+    return 'bg-red-600 text-white';
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       <aside className={cn(
-        "bg-[#2D2D2D] text-white transition-all duration-300 h-screen sticky top-0",
-        isSidebarCollapsed ? "w-20" : "w-64"
+        "bg-[#1a1a1a] text-white transition-all duration-300 h-screen sticky top-0 border-r border-gray-800",
+        isSidebarCollapsed ? "w-16" : "w-72"
       )}>
-        <div className="p-4 flex items-center justify-between border-b border-gray-700">
+        {/* Header */}
+        <div className="p-3 flex items-center justify-between border-b border-gray-800">
           <div className="flex items-center space-x-3">
-            <div className="relative w-10 h-10">
+            <div className="relative w-10 h-10 flex-shrink-0">
               <img 
                 src={userData.restaurantImage}
                 alt={userData.restaurantName}
                 className="w-full h-full object-cover rounded-lg"
               />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-[#2D2D2D] rounded-full"></div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-[#1a1a1a] rounded-full"></div>
             </div>
             {!isSidebarCollapsed && (
-              <div>
-                <h3 className="font-bold text-lg text-white">{userData.restaurantName}</h3>
-                <p className="text-xs text-gray-400">Restaurant</p>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-bold text-sm text-white truncate">{userData.restaurantName}</h3>
+                <p className="text-xs text-gray-400 truncate">Restaurant</p>
               </div>
             )}
           </div>
@@ -240,49 +326,72 @@ export const RestaurantDashboard = () => {
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg"
+            className="text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg h-8 w-8 flex-shrink-0"
           >
-            <MenuIcon className="h-5 w-5" />
+            <MenuIcon className="h-4 w-4" />
           </Button>
         </div>
 
-        <nav className="mt-4">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-2">
           {sidebarItems.map((item, index) => (
-            <div key={index} className="mb-2">
+            <div key={index} className="mb-1">
               <div 
                 className={cn(
-                  "flex items-center px-4 py-2.5 text-gray-400 hover:text-white hover:bg-[#ff6600]/10 cursor-pointer transition-colors",
-                  !isSidebarCollapsed && "space-x-3"
+                  "flex items-center mx-2 px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer transition-all duration-200 rounded-lg group",
+                  !isSidebarCollapsed && "justify-between"
                 )}
                 onClick={() => handleSidebarItemClick(item)}
               >
-                <div className="min-w-[24px] flex items-center justify-center">
-                  {item.icon}
-                </div>
-                {!isSidebarCollapsed && (
-                  <>
-                    <span className="flex-1 text-sm font-medium tracking-wide">
+                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                  <div className="flex-shrink-0">
+                    {item.icon}
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <span className="text-xs font-medium tracking-wide truncate">
                       {item.name}
                     </span>
-                    {item.count !== undefined && (
-                      <span className="bg-[#ff6600] text-white px-2 py-0.5 rounded-full text-xs font-medium">
-                        {item.count}
-                      </span>
-                    )}
-                  </>
+                  )}
+                </div>
+                {!isSidebarCollapsed && item.subItems && (
+                  <ChevronDown 
+                    className={cn(
+                      "h-3 w-3 transition-transform duration-200 flex-shrink-0",
+                      expandedSections.includes(item.name) && "rotate-180"
+                    )} 
+                  />
+                )}
+                {!isSidebarCollapsed && item.count !== undefined && (
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0",
+                    getStatusColor(item.count)
+                  )}>
+                    {item.count}
+                  </span>
                 )}
               </div>
-              {!isSidebarCollapsed && item.subItems && (
-                <div className="pl-12 pr-4 space-y-1 mt-1">
+              
+              {!isSidebarCollapsed && item.subItems && expandedSections.includes(item.name) && (
+                <div className="ml-4 mr-2 mt-1 space-y-1">
                   {item.subItems.map((subItem, subIndex) => (
                     <div
                       key={subIndex}
-                      className="flex items-center justify-between py-2 px-3 text-sm text-gray-400 hover:text-white hover:bg-[#ff6600]/5 rounded-lg cursor-pointer transition-colors"
+                      className="flex items-center justify-between py-1.5 px-3 text-xs text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg cursor-pointer transition-all duration-200 group"
                       onClick={() => handleSubItemClick(subItem.component)}
                     >
-                      <span className="font-medium">{subItem.name}</span>
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        {subItem.icon && (
+                          <div className="flex-shrink-0">
+                            {subItem.icon}
+                          </div>
+                        )}
+                        <span className="font-medium truncate">{subItem.name}</span>
+                      </div>
                       {subItem.count !== undefined && (
-                        <span className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full text-xs font-medium">
+                        <span className={cn(
+                          "px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ml-2",
+                          getStatusColor(subItem.count)
+                        )}>
                           {subItem.count}
                         </span>
                       )}
@@ -293,6 +402,27 @@ export const RestaurantDashboard = () => {
             </div>
           ))}
         </nav>
+
+        {/* Footer avec profil utilisateur */}
+        {!isSidebarCollapsed && (
+          <div className="border-t border-gray-800 p-3">
+            <div 
+              className="flex items-center space-x-3 cursor-pointer hover:bg-gray-800 rounded-lg p-2 transition-colors"
+              onClick={handleProfileClick}
+            >
+              <UserCircle className="w-8 h-8 text-gray-400 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-white truncate">
+                  {userData.firstName} {userData.lastName}
+                </p>
+                <div className="flex items-center gap-1">
+                  <Shield className="w-2 h-2 text-[#ff6600]" />
+                  <p className="text-xs text-[#ff6600] font-medium truncate">@{userData.username}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
