@@ -47,7 +47,8 @@ import {
   Search,
   MoreHorizontal,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plus
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Menu } from './pages/Menu';
@@ -60,6 +61,7 @@ import { ConfirmedOrders } from './pages/ConfirmedOrders';
 import { FoodOnTheWayOrders } from './pages/FoodOnTheWayOrders';
 import { PendingOrders } from './pages/PendingOrders';
 import { CookingOrders } from './pages/CookingOrders';
+import { NewCategory } from './pages/NewCategory';
 
 interface OrderStats {
   confirmed: number;
@@ -272,11 +274,16 @@ export const RestaurantDashboard = () => {
         { 
           name: 'Ajouter un plat', 
           component: <AddNewFood />,
-          icon: <Package className="h-3 w-3" />
+          icon: <Plus className="h-3 w-3" />
         },
         { 
           name: 'Catégories', 
           icon: <Filter className="h-3 w-3" />
+        },
+        { 
+          name: 'Ajouter une catégorie', 
+          component: <NewCategory />,
+          icon: <Plus className="h-3 w-3" />
         },
         { 
           name: 'Promotions', 
