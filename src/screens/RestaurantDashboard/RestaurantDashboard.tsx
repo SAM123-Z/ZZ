@@ -58,6 +58,7 @@ import { AddNewFood } from './pages/AddNewFood';
 import { OrdersList } from './pages/OrdersList';
 import { ConfirmedOrders } from './pages/ConfirmedOrders';
 import { FoodOnTheWayOrders } from './pages/FoodOnTheWayOrders';
+import { PendingOrders } from './pages/PendingOrders';
 
 interface OrderStats {
   confirmed: number;
@@ -183,7 +184,7 @@ export const RestaurantDashboard = () => {
   const orderStats = {
     all: 63,
     cooking: 2,
-    pending: 35,
+    pending: 20,
     confirmed: 9,
     readyForDelivery: 3,
     onTheWay: 2,
@@ -223,7 +224,8 @@ export const RestaurantDashboard = () => {
           name: 'En attente', 
           count: orderStats.pending,
           icon: <Clock className="h-3 w-3" />,
-          priority: orderStats.pending > 20 ? 'high' : 'medium'
+          priority: orderStats.pending > 15 ? 'high' : 'medium',
+          component: <PendingOrders />
         },
         { 
           name: 'Confirmées', 
