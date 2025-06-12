@@ -14,15 +14,17 @@ import { FeedbackPage } from "./screens/Feedback/FeedbackPage";
 import { RestaurantSignup } from "./screens/RestaurantSignup";
 import { RestaurantDashboard } from "./screens/RestaurantDashboard/RestaurantDashboard";
 import { Profile } from "./screens/Profile/Profile";
+import { DeliverySignup } from "./screens/DeliverySignup";
 
 const AppContent = () => {
   const location = useLocation();
   const isDashboard = location.pathname === '/restaurant-dashboard';
   const isRestaurantSignup = location.pathname === '/restaurant-signup';
+  const isDeliverySignup = location.pathname === '/delivery-signup';
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isDashboard && <HeaderSection />}
+      {!isDashboard && !isDeliverySignup && <HeaderSection />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -34,9 +36,10 @@ const AppContent = () => {
           <Route path="/restaurant-signup" element={<RestaurantSignup />} />
           <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/delivery-signup" element={<DeliverySignup />} />
         </Routes>
       </main>
-      {!isDashboard && !isRestaurantSignup && <FooterSection />}
+      {!isDashboard && !isRestaurantSignup && !isDeliverySignup && <FooterSection />}
     </div>
   );
 };
