@@ -6,6 +6,7 @@ export { FoodOnTheWayOrders } from './FoodOnTheWayOrders';
 export { PendingOrders } from './PendingOrders';
 export { CookingOrders } from './CookingOrders';
 export { FoodList } from './FoodList';
+export { FoodListPage } from './FoodListPage';
 export { Categories } from './Categories';
 export { NewCategory } from './NewCategory';
 export { AddNewFood } from './AddNewFood';

@@ -62,6 +62,7 @@ import { FoodOnTheWayOrders } from './pages/FoodOnTheWayOrders';
 import { PendingOrders } from './pages/PendingOrders';
 import { CookingOrders } from './pages/CookingOrders';
 import { NewCategory } from './pages/NewCategory';
+import { FoodListPage } from './pages/FoodListPage';
 
 interface OrderStats {
   confirmed: number;
@@ -270,6 +271,11 @@ export const RestaurantDashboard = () => {
           name: 'Gestion du menu', 
           component: <Menu />,
           icon: <Palette className="h-3 w-3" />
+        },
+        { 
+          name: 'Liste des plats', 
+          component: <FoodListPage />,
+          icon: <Package className="h-3 w-3" />
         },
         { 
           name: 'Ajouter un plat', 
