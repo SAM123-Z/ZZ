@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
+import { RealTimeOrderTracker } from '../../components/ui/real-time-order-tracker';
 import { 
   Bell,
   User,
@@ -25,110 +26,10 @@ import {
   CheckCircle,
   AlertCircle,
   Phone,
-  MessageSquare
+  MessageSquare,
+  ExternalLink
 } from 'lucide-react';
-
-interface Order {
-  id: string;
-  orderId: string;
-  status: 'COD' | 'PAID';
-  restaurantName: string;
-  restaurantLocation: string;
-  customerName: string;
-  customerPhone: string;
-  address: string;
-  amount: number;
-  distance: string;
-  estimatedTime: string;
-  priority: 'high' | 'medium' | 'low';
-}
-
-const activeOrders: Order[] = [
-  {
-    id: '1',
-    orderId: '100102',
-    status: 'COD',
-    restaurantName: 'Pizza Palace',
-    restaurantLocation: 'Restaurant Location',
-    customerName: 'Ahmed Hassan',
-    customerPhone: '+212 6XX XXX XXX',
-    address: 'House : 00 , Road : 00 , Test City',
-    amount: 125.50,
-    distance: '2.3 km',
-    estimatedTime: '15 min',
-    priority: 'high'
-  },
-  {
-    id: '2',
-    orderId: '100103',
-    status: 'PAID',
-    restaurantName: 'Burger King',
-    restaurantLocation: 'Restaurant Location',
-    customerName: 'Sarah Johnson',
-    customerPhone: '+212 6XX XXX XXX',
-    address: 'House : 00 , Road : 00 , Test City',
-    amount: 89.75,
-    distance: '1.8 km',
-    estimatedTime: '12 min',
-    priority: 'medium'
-  },
-  {
-    id: '3',
-    orderId: '100104',
-    status: 'COD',
-    restaurantName: 'Café Monarch',
-    restaurantLocation: 'Restaurant Location',
-    customerName: 'Mohamed Ali',
-    customerPhone: '+212 6XX XXX XXX',
-    address: 'House : 00 , Road : 00 , Test City',
-    amount: 67.25,
-    distance: '3.1 km',
-    estimatedTime: '18 min',
-    priority: 'low'
-  },
-  {
-    id: '4',
-    orderId: '100105',
-    status: 'PAID',
-    restaurantName: 'Sushi Master',
-    restaurantLocation: 'Restaurant Location',
-    customerName: 'Lisa Chen',
-    customerPhone: '+212 6XX XXX XXX',
-    address: 'House : 00 , Road : 00 , Test City',
-    amount: 156.80,
-    distance: '2.7 km',
-    estimatedTime: '20 min',
-    priority: 'high'
-  },
-  {
-    id: '5',
-    orderId: '100106',
-    status: 'COD',
-    restaurantName: 'Taco Bell',
-    restaurantLocation: 'Restaurant Location',
-    customerName: 'David Wilson',
-    customerPhone: '+212 6XX XXX XXX',
-    address: 'House : 00 , Road : 00 , Test City',
-    amount: 43.90,
-    distance: '1.5 km',
-    estimatedTime: '10 min',
-    priority: 'medium'
-  },
-  {
-    id: '6',
-    orderId: '100107',
-    status: 'PAID',
-    restaurantName: 'KFC',
-    restaurantLocation: 'Restaurant Location',
-    customerName: 'Emma Brown',
-    customerPhone: '+212 6XX XXX XXX',
-    address: 'House : 00 , Road : 00 , Test City',
-    amount: 78.60,
-    distance: '2.9 km',
-    estimatedTime: '16 min',
-    priority: 'low'
-  }
-];
+import { useOrderTracking } from '../../context/OrderTrackingContext';
 
 const orderStats = [
   {
@@ -199,7 +100,7 @@ const getPriorityColor = (priority: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'COD': return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'PAID': return 'bg-green-100 text-green-800 border-green-200';
+    case 'Paid': return 'bg-green-100 text-green-800 border-green-200';
     default: return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 };
@@ -207,6 +108,43 @@ const getStatusColor = (status: string) => {
 export const DeliveryHome = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const { getOrdersByDeliveryPerson, updateOrderStatus, updateDeliveryLocation } = useOrderTracking();
+  
+  // Obtenir les commandes assignées au livreur actuel
+  const deliveryPersonId = 'delivery_1'; // ID du livreur connecté
+  const assignedOrders = getOrdersByDeliveryPerson(deliveryPersonId);
+
+  // Simuler les mises à jour de localisation
+  useEffect(() => {
+    if (isOnline) {
+      const interval = setInterval(() => {
+        // Simuler la mise à jour de localisation pour les commandes en livraison
+        assignedOrders.forEach(order => {
+          if (order.orderStatus === 'Out For Delivery') {
+            const newLocation = {
+              lat: 33.5731 + (Math.random() - 0.5) * 0.01,
+              lng: -7.5898 + (Math.random() - 0.5) * 0.01,
+              address: 'En route vers le client',
+              timestamp: new Date()
+            };
+            updateDeliveryLocation(order.orderId, newLocation);
+          }
+        });
+      }, 10000); // Mise à jour toutes les 10 secondes
+
+      return () => clearInterval(interval);
+    }
+  }, [isOnline, assignedOrders, updateDeliveryLocation]);
+
+  const handleStatusUpdate = (orderId: string, newStatus: string) => {
+    updateOrderStatus(orderId, newStatus as any, deliveryPersonId, `Status updated by delivery person`);
+  };
+
+  const openOrderTracking = (orderId: string) => {
+    const url = `/order-tracking/${orderId}?userType=delivery&userId=${deliveryPersonId}`;
+    window.open(url, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
@@ -252,7 +190,7 @@ export const DeliveryHome = () => {
             <Button variant="ghost" size="icon" className="relative hover:bg-orange-50 transition-colors">
               <Bell className="h-5 w-5 text-gray-600" />
               <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse font-bold">
-                3
+                {assignedOrders.length}
               </span>
             </Button>
 
@@ -339,8 +277,8 @@ export const DeliveryHome = () => {
                     <Package className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Active Orders</h2>
-                    <p className="text-sm text-gray-500">Commandes en cours de livraison</p>
+                    <h2 className="text-2xl font-bold text-gray-800">My Active Orders</h2>
+                    <p className="text-sm text-gray-500">Commandes assignées ({assignedOrders.length})</p>
                   </div>
                 </div>
                 <Button 
@@ -352,88 +290,156 @@ export const DeliveryHome = () => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {activeOrders.map((order) => (
-                  <div 
-                    key={order.id} 
-                    className={`bg-white rounded-xl shadow-lg border-l-4 ${getPriorityColor(order.priority)} p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
-                  >
-                    {/* Header de la commande */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-bold text-gray-600">#{order.orderId}</span>
-                        <Badge className={`${getStatusColor(order.status)} border text-xs font-semibold px-2 py-1`}>
-                          {order.status}
+              {assignedOrders.length > 0 ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {assignedOrders.map((order) => (
+                    <div 
+                      key={order.id} 
+                      className={`bg-white rounded-xl shadow-lg border-l-4 ${getPriorityColor(order.priority)} p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
+                    >
+                      {/* Header de la commande */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-bold text-gray-600">#{order.orderId}</span>
+                          <Badge className={`${getStatusColor(order.paymentStatus)} border text-xs font-semibold px-2 py-1`}>
+                            {order.paymentStatus}
+                          </Badge>
+                          {order.deliveryLocation && order.orderStatus === 'Out For Delivery' && (
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Suivi en temps réel"></div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-green-600">${order.totalAmount.toFixed(2)}</p>
+                          <p className="text-xs text-gray-500">{order.distance} • {order.estimatedTime}</p>
+                        </div>
+                      </div>
+
+                      {/* Informations restaurant */}
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Package className="w-4 h-4 text-orange-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Restaurant</p>
+                            <p className="text-sm font-semibold text-gray-800">{order.restaurantName}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Client</p>
+                            <p className="text-sm font-semibold text-gray-800">{order.customerName}</p>
+                            <p className="text-xs text-gray-600">{order.customerPhone}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-3">
+                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <MapPin className="w-4 h-4 text-green-600" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Adresse</p>
+                            <p className="text-sm text-gray-700">{order.customerAddress}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Statut actuel */}
+                      <div className="mb-4">
+                        <Badge className={`${getStatusColor(order.orderStatus)} border text-sm font-medium px-3 py-1`}>
+                          {order.orderStatus}
                         </Badge>
                       </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">${order.amount}</p>
-                        <p className="text-xs text-gray-500">{order.distance} • {order.estimatedTime}</p>
+
+                      {/* Actions */}
+                      <div className="flex space-x-2">
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                          onClick={() => setSelectedOrderId(selectedOrderId === order.orderId ? null : order.orderId)}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Details
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                          onClick={() => openOrderTracking(order.orderId)}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          Track
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </Button>
                       </div>
+
+                      {/* Actions de changement de statut */}
+                      {order.orderStatus === 'Ready For Delivery' && (
+                        <div className="mt-3">
+                          <Button 
+                            size="sm"
+                            onClick={() => handleStatusUpdate(order.orderId, 'Out For Delivery')}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                          >
+                            Commencer la livraison
+                          </Button>
+                        </div>
+                      )}
+
+                      {order.orderStatus === 'Out For Delivery' && (
+                        <div className="mt-3">
+                          <Button 
+                            size="sm"
+                            onClick={() => handleStatusUpdate(order.orderId, 'Delivered')}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            Marquer comme livré
+                          </Button>
+                        </div>
+                      )}
                     </div>
-
-                    {/* Informations restaurant */}
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Package className="w-4 h-4 text-orange-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">Restaurant</p>
-                          <p className="text-sm font-semibold text-gray-800">{order.restaurantName}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">Client</p>
-                          <p className="text-sm font-semibold text-gray-800">{order.customerName}</p>
-                          <p className="text-xs text-gray-600">{order.customerPhone}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <MapPin className="w-4 h-4 text-green-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">Adresse</p>
-                          <p className="text-sm text-gray-700">{order.address}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Details
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-                      >
-                        <Navigation className="w-4 h-4 mr-2" />
-                        Navigate
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        className="border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune commande assignée</h3>
+                  <p className="text-gray-600">
+                    {isOnline ? 'Vous êtes en ligne et prêt à recevoir des commandes.' : 'Passez en ligne pour recevoir des commandes.'}
+                  </p>
+                </div>
+              )}
             </div>
+
+            {/* Tracker détaillé pour la commande sélectionnée */}
+            {selectedOrderId && (
+              <div className="mt-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800">Suivi détaillé - Commande #{selectedOrderId}</h3>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSelectedOrderId(null)}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    Fermer
+                  </Button>
+                </div>
+                <RealTimeOrderTracker
+                  orderId={selectedOrderId}
+                  userType="delivery"
+                  userId={deliveryPersonId}
+                />
+              </div>
+            )}
           </div>
 
           {/* Colonne droite - Stats et Earnings */}
