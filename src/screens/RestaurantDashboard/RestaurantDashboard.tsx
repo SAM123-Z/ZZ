@@ -63,6 +63,7 @@ import { PendingOrders } from './pages/PendingOrders';
 import { CookingOrders } from './pages/CookingOrders';
 import { NewCategory } from './pages/NewCategory';
 import { FoodListPage } from './pages/FoodListPage';
+import { ShopDetails } from './pages/ShopDetails';
 
 interface OrderStats {
   confirmed: number;
@@ -408,6 +409,11 @@ export const RestaurantDashboard = () => {
         { 
           name: 'Profil restaurant',
           component: <BasicInformation />,
+          icon: <Store className="h-3 w-3" />
+        },
+        { 
+          name: 'Détails du restaurant',
+          component: <ShopDetails />,
           icon: <Store className="h-3 w-3" />
         },
         { 

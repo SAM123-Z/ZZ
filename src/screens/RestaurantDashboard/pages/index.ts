@@ -10,3 +10,4 @@ export { FoodListPage } from './FoodListPage';
 export { Categories } from './Categories';
 export { NewCategory } from './NewCategory';
 export { AddNewFood } from './AddNewFood';
+export { ShopDetails } from './ShopDetails';
