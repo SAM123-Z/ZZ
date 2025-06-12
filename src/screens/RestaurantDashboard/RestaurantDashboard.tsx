@@ -56,6 +56,7 @@ import { ChangePassword } from './pages/ChangePassword';
 import { DashboardOverview } from './pages/DashboardOverview';
 import { AddNewFood } from './pages/AddNewFood';
 import { OrdersList } from './pages/OrdersList';
+import { ConfirmedOrders } from './pages/ConfirmedOrders';
 
 interface OrderStats {
   confirmed: number;
@@ -182,7 +183,7 @@ export const RestaurantDashboard = () => {
     all: 63,
     cooking: 2,
     pending: 35,
-    confirmed: 1,
+    confirmed: 9,
     readyForDelivery: 3,
     onTheWay: 1,
     delivered: 23,
@@ -226,7 +227,8 @@ export const RestaurantDashboard = () => {
         { 
           name: 'Confirmées', 
           count: orderStats.confirmed,
-          icon: <CheckCircle className="h-3 w-3" />
+          icon: <CheckCircle className="h-3 w-3" />,
+          component: <ConfirmedOrders />
         },
         { 
           name: 'Prêtes à livrer', 
