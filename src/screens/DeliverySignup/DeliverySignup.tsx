@@ -65,8 +65,8 @@ export const DeliverySignup = () => {
         drivingLicense 
       });
       await new Promise(resolve => setTimeout(resolve, 1500));
-      // Rediriger vers une page de confirmation ou dashboard
-      navigate('/');
+      // Rediriger vers la page d'accueil livreur
+      navigate('/delivery-home');
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {

@@ -15,16 +15,18 @@ import { RestaurantSignup } from "./screens/RestaurantSignup";
 import { RestaurantDashboard } from "./screens/RestaurantDashboard/RestaurantDashboard";
 import { Profile } from "./screens/Profile/Profile";
 import { DeliverySignup } from "./screens/DeliverySignup";
+import { DeliveryHome } from "./screens/DeliveryHome";
 
 const AppContent = () => {
   const location = useLocation();
   const isDashboard = location.pathname === '/restaurant-dashboard';
   const isRestaurantSignup = location.pathname === '/restaurant-signup';
   const isDeliverySignup = location.pathname === '/delivery-signup';
+  const isDeliveryHome = location.pathname === '/delivery-home';
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isDashboard && !isDeliverySignup && <HeaderSection />}
+      {!isDashboard && !isDeliverySignup && !isDeliveryHome && <HeaderSection />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -37,9 +39,10 @@ const AppContent = () => {
           <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/delivery-signup" element={<DeliverySignup />} />
+          <Route path="/delivery-home" element={<DeliveryHome />} />
         </Routes>
       </main>
-      {!isDashboard && !isRestaurantSignup && !isDeliverySignup && <FooterSection />}
+      {!isDashboard && !isRestaurantSignup && !isDeliverySignup && !isDeliveryHome && <FooterSection />}
     </div>
   );
 };
