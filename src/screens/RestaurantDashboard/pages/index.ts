@@ -4,6 +4,7 @@ export { OrdersList } from './OrdersList';
 export { ConfirmedOrders } from './ConfirmedOrders';
 export { FoodOnTheWayOrders } from './FoodOnTheWayOrders';
 export { PendingOrders } from './PendingOrders';
+export { CookingOrders } from './CookingOrders';
 export { FoodList } from './FoodList';
 export { Categories } from './Categories';
 export { AddNewFood } from './AddNewFood';
