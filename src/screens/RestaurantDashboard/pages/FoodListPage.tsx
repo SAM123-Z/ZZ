@@ -9,7 +9,6 @@ import {
   Edit, 
   Trash2,
   Package,
-  Filter,
   Download,
   ChevronDown
 } from 'lucide-react';
@@ -96,20 +95,21 @@ export const FoodListPage = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm">
-      {/* Header */}
+      {/* Header exact comme dans l'image */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold text-gray-800">Food List</h1>
-          <Badge className="bg-gray-600 text-white border-none">
-            {foodItems.length}
+          <Badge className="bg-gray-600 text-white border-none px-2 py-1 text-sm font-medium">
+            73
           </Badge>
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Dropdown All categories */}
+          {/* Dropdown All categories exact */}
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger className="w-48 h-10 rounded-lg border-2">
+            <SelectTrigger className="w-48 h-10 rounded border border-gray-300 bg-white text-gray-700 text-sm">
               <SelectValue placeholder="All categories" />
+              <ChevronDown className="w-4 h-4 text-gray-500" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
@@ -121,10 +121,10 @@ export const FoodListPage = () => {
             </SelectContent>
           </Select>
           
-          {/* Export button */}
+          {/* Export button exact */}
           <Button 
             variant="outline" 
-            className="h-10 px-4 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+            className="h-10 px-4 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded bg-white text-sm font-medium flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
             Export
@@ -133,92 +133,93 @@ export const FoodListPage = () => {
         </div>
       </div>
 
-      {/* Search bar */}
-      <div className="flex justify-between items-center mb-6">
+      {/* Search bar exact */}
+      <div className="mb-6">
         <div className="relative w-80">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
             placeholder="Search by name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 rounded-lg border-2 focus:border-[#ff6600]"
+            className="pl-10 h-10 rounded border border-gray-300 bg-gray-50 text-sm"
           />
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      {/* Table exact comme dans l'image */}
+      <div className="overflow-x-auto border border-gray-200 rounded">
         <Table>
           <TableHeader className="bg-gray-50">
-            <TableRow>
-              <TableHead className="font-semibold text-gray-700 py-4 w-16">
-                <div className="flex items-center gap-2">
+            <TableRow className="border-b border-gray-200">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-left text-sm w-16">
+                <div className="flex items-center gap-1">
                   <span>Sl</span>
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-gray-700 py-4">
-                <div className="flex items-center gap-2">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-left text-sm">
+                <div className="flex items-center gap-1">
                   <span>Name</span>
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-gray-700 py-4">
-                <div className="flex items-center gap-2">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-left text-sm">
+                <div className="flex items-center gap-1">
                   <span>Category</span>
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-gray-700 py-4">
-                <div className="flex items-center gap-2">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-left text-sm">
+                <div className="flex items-center gap-1">
                   <span>Restaurant</span>
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-gray-700 py-4">
-                <div className="flex items-center gap-2">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-left text-sm">
+                <div className="flex items-center gap-1">
                   <span>Price</span>
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-gray-700 py-4">
-                <div className="flex items-center gap-2">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-left text-sm">
+                <div className="flex items-center gap-1">
                   <span>Status</span>
                   <ChevronDown className="w-3 h-3 text-gray-400" />
                 </div>
               </TableHead>
-              <TableHead className="font-semibold text-gray-700 py-4 text-center">
+              <TableHead className="font-medium text-gray-700 py-3 px-4 text-center text-sm">
                 Action
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredItems.map((item) => (
-              <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
-                <TableCell className="py-4 font-medium text-gray-900">
+              <TableRow key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <TableCell className="py-3 px-4 font-medium text-gray-900 text-sm">
                   {item.id}
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-3 px-4">
                   <div className="flex items-center gap-3">
                     <img 
                       src={item.image} 
                       alt={item.name}
-                      className="w-12 h-12 rounded-lg object-cover"
+                      className="w-10 h-10 rounded object-cover"
                     />
-                    <span className="font-medium text-gray-900">{item.name}</span>
+                    <span className="font-medium text-gray-900 text-sm">{item.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="py-4">
-                  <span className="text-gray-700">{item.category}</span>
+                <TableCell className="py-3 px-4">
+                  <span className="text-gray-700 text-sm">{item.category}</span>
                 </TableCell>
-                <TableCell className="py-4">
-                  <span className="text-gray-700">{item.restaurant}</span>
+                <TableCell className="py-3 px-4">
+                  <span className="text-gray-700 text-sm">{item.restaurant}</span>
                 </TableCell>
-                <TableCell className="py-4">
-                  <span className="font-medium text-gray-900">$ {item.price.toFixed(2)}</span>
+                <TableCell className="py-3 px-4">
+                  <span className="font-medium text-gray-900 text-sm">$ {item.price.toFixed(2)}</span>
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-3 px-4">
                   <div className="flex items-center">
+                    {/* Toggle switch exact comme dans l'image */}
                     <div className="relative">
                       <input
                         type="checkbox"
@@ -226,30 +227,32 @@ export const FoodListPage = () => {
                         readOnly
                         className="sr-only"
                       />
-                      <div className={`w-12 h-6 rounded-full transition-colors ${
+                      <div className={`w-11 h-6 rounded-full transition-colors cursor-pointer ${
                         item.status === 'active' ? 'bg-blue-500' : 'bg-gray-300'
                       }`}>
-                        <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-transform ${
-                          item.status === 'active' ? 'translate-x-6' : 'translate-x-0.5'
+                        <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform ${
+                          item.status === 'active' ? 'translate-x-5' : 'translate-x-0.5'
                         } mt-0.5`}></div>
                       </div>
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="py-4">
+                <TableCell className="py-3 px-4">
                   <div className="flex items-center justify-center gap-2">
+                    {/* Bouton Edit bleu exact */}
                     <Button 
                       variant="outline" 
                       size="icon"
-                      className="h-8 w-8 border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+                      className="h-8 w-8 border border-blue-300 text-blue-600 hover:bg-blue-50 rounded"
                       title="Modifier"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
+                    {/* Bouton Delete orange exact */}
                     <Button 
                       variant="outline" 
                       size="icon"
-                      className="h-8 w-8 border-orange-200 text-orange-600 hover:bg-orange-50 hover:border-orange-300"
+                      className="h-8 w-8 border border-orange-300 text-orange-600 hover:bg-orange-50 rounded"
                       title="Supprimer"
                     >
                       <Trash2 className="h-4 w-4" />
