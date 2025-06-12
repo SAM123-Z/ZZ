@@ -57,6 +57,7 @@ import { DashboardOverview } from './pages/DashboardOverview';
 import { AddNewFood } from './pages/AddNewFood';
 import { OrdersList } from './pages/OrdersList';
 import { ConfirmedOrders } from './pages/ConfirmedOrders';
+import { FoodOnTheWayOrders } from './pages/FoodOnTheWayOrders';
 
 interface OrderStats {
   confirmed: number;
@@ -185,7 +186,7 @@ export const RestaurantDashboard = () => {
     pending: 35,
     confirmed: 9,
     readyForDelivery: 3,
-    onTheWay: 1,
+    onTheWay: 2,
     delivered: 23,
     paymentFailed: 0,
     canceled: 2
@@ -239,7 +240,8 @@ export const RestaurantDashboard = () => {
         { 
           name: 'En livraison', 
           count: orderStats.onTheWay,
-          icon: <Truck className="h-3 w-3" />
+          icon: <Truck className="h-3 w-3" />,
+          component: <FoodOnTheWayOrders />
         },
         { 
           name: 'Livrées', 
