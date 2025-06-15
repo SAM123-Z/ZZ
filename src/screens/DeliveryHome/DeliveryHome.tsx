@@ -30,6 +30,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useOrderTracking } from '../../context/OrderTrackingContext';
+import { useNavigate } from 'react-router-dom';
 
 const orderStats = [
   {
@@ -106,6 +107,7 @@ const getStatusColor = (status: string) => {
 };
 
 export const DeliveryHome = () => {
+  const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -144,6 +146,10 @@ export const DeliveryHome = () => {
   const openOrderTracking = (orderId: string) => {
     const url = `/order-tracking/${orderId}?userType=delivery&userId=${deliveryPersonId}`;
     window.open(url, '_blank');
+  };
+
+  const handleProfileClick = () => {
+    navigate('/delivery-profile');
   };
 
   return (
@@ -226,7 +232,10 @@ export const DeliveryHome = () => {
             </div>
 
             {/* Profil utilisateur */}
-            <div className="flex items-center space-x-3 bg-white rounded-full px-4 py-2 shadow-md border hover:shadow-lg transition-shadow cursor-pointer">
+            <div 
+              className="flex items-center space-x-3 bg-white rounded-full px-4 py-2 shadow-md border hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={handleProfileClick}
+            >
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <User className="w-5 h-5 text-white" />
@@ -568,9 +577,10 @@ export const DeliveryHome = () => {
                   </Button>
                   <Button 
                     className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl p-4 h-auto flex flex-col items-center space-y-2 shadow-md hover:shadow-lg transition-all duration-200"
+                    onClick={handleProfileClick}
                   >
                     <Settings className="w-5 h-5" />
-                    <span className="text-sm font-medium">Settings</span>
+                    <span className="text-sm font-medium">Profile</span>
                   </Button>
                 </div>
               </div>

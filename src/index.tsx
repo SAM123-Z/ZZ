@@ -17,6 +17,7 @@ import { RestaurantDashboard } from "./screens/RestaurantDashboard/RestaurantDas
 import { Profile } from "./screens/Profile/Profile";
 import { DeliverySignup } from "./screens/DeliverySignup";
 import { DeliveryHome } from "./screens/DeliveryHome";
+import { DeliveryProfile } from "./screens/DeliveryProfile";
 import { OrderTrackingPage } from "./screens/OrderTracking";
 
 const AppContent = () => {
@@ -25,11 +26,12 @@ const AppContent = () => {
   const isRestaurantSignup = location.pathname === '/restaurant-signup';
   const isDeliverySignup = location.pathname === '/delivery-signup';
   const isDeliveryHome = location.pathname === '/delivery-home';
+  const isDeliveryProfile = location.pathname === '/delivery-profile';
   const isOrderTracking = location.pathname.startsWith('/order-tracking');
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isDashboard && !isDeliverySignup && !isDeliveryHome && !isOrderTracking && <HeaderSection />}
+      {!isDashboard && !isDeliverySignup && !isDeliveryHome && !isDeliveryProfile && !isOrderTracking && <HeaderSection />}
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -43,10 +45,11 @@ const AppContent = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/delivery-signup" element={<DeliverySignup />} />
           <Route path="/delivery-home" element={<DeliveryHome />} />
+          <Route path="/delivery-profile" element={<DeliveryProfile />} />
           <Route path="/order-tracking/:orderId?" element={<OrderTrackingPage />} />
         </Routes>
       </main>
-      {!isDashboard && !isRestaurantSignup && !isDeliverySignup && !isDeliveryHome && !isOrderTracking && <FooterSection />}
+      {!isDashboard && !isRestaurantSignup && !isDeliverySignup && !isDeliveryHome && !isDeliveryProfile && !isOrderTracking && <FooterSection />}
     </div>
   );
 };
